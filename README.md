@@ -76,7 +76,7 @@ gdal_translate -of PNG input_georef.pdf output.png
 ## Offline basemap notes (Esri)
 
 - Offline cache endpoint stores tiles under `data/tile_cache/<provider>/<z>/<x>/<y>.png`.
-- Large cache requests are restricted (`MAX_TILE_DOWNLOAD=4000`) to keep local runs stable.
+- Large cache requests are restricted (`MAX_TILES_TO_DOWNLOAD=4000`) to keep local runs stable.
 - Use Esri services in compliance with Esri terms of use and attribution requirements.
 
 ## Data persistence

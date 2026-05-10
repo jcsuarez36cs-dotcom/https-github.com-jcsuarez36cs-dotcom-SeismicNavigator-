@@ -136,7 +136,8 @@ async def download_offline_tiles(request: OfflineDownloadRequest) -> dict:
     provider_dir.mkdir(parents=True, exist_ok=True)
 
     zoom_levels = range(request.min_zoom, request.max_zoom + 1)
-    requested_tile_count = sum(1 for _ in mercantile.tiles(request.west, request.south, request.east, request.north, zoom_levels))
+    requested_tiles = list(mercantile.tiles(request.west, request.south, request.east, request.north, zoom_levels))
+    requested_tile_count = len(requested_tiles)
     if requested_tile_count > MAX_TILES_TO_DOWNLOAD:
         raise HTTPException(
             status_code=400,
@@ -149,7 +150,7 @@ async def download_offline_tiles(request: OfflineDownloadRequest) -> dict:
 
     timeout = httpx.Timeout(20.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
-        for tile in mercantile.tiles(request.west, request.south, request.east, request.north, zoom_levels):
+        for tile in requested_tiles:
             destination = provider_dir / str(tile.z) / str(tile.x)
             destination.mkdir(parents=True, exist_ok=True)
             tile_file = destination / f"{tile.y}.png"
