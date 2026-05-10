@@ -25,7 +25,7 @@ ESRI_PROVIDERS = {
     "imagery": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     "topo": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
 }
-MAX_TILE_DOWNLOAD = 4000
+MAX_TILES_TO_DOWNLOAD = 4000
 
 app = FastAPI(title="SeismicNavigator", version="1.0.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -135,11 +135,12 @@ async def download_offline_tiles(request: OfflineDownloadRequest) -> dict:
     provider_dir = TILE_CACHE_DIR / request.provider
     provider_dir.mkdir(parents=True, exist_ok=True)
 
-    tile_list = list(mercantile.tiles(request.west, request.south, request.east, request.north, range(request.min_zoom, request.max_zoom + 1)))
-    if len(tile_list) > MAX_TILE_DOWNLOAD:
+    zoom_levels = range(request.min_zoom, request.max_zoom + 1)
+    requested_tile_count = sum(1 for _ in mercantile.tiles(request.west, request.south, request.east, request.north, zoom_levels))
+    if requested_tile_count > MAX_TILES_TO_DOWNLOAD:
         raise HTTPException(
             status_code=400,
-            detail=f"Requested {len(tile_list)} tiles, which exceeds limit of {MAX_TILE_DOWNLOAD}. Reduce area or zoom range.",
+            detail=f"Requested {requested_tile_count} tiles, which exceeds limit of {MAX_TILES_TO_DOWNLOAD}. Reduce area or zoom range.",
         )
 
     downloaded = 0
@@ -148,7 +149,7 @@ async def download_offline_tiles(request: OfflineDownloadRequest) -> dict:
 
     timeout = httpx.Timeout(20.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
-        for tile in tile_list:
+        for tile in mercantile.tiles(request.west, request.south, request.east, request.north, zoom_levels):
             destination = provider_dir / str(tile.z) / str(tile.x)
             destination.mkdir(parents=True, exist_ok=True)
             tile_file = destination / f"{tile.y}.png"
@@ -170,7 +171,7 @@ async def download_offline_tiles(request: OfflineDownloadRequest) -> dict:
 
     return {
         "provider": request.provider,
-        "requested": len(tile_list),
+        "requested": requested_tile_count,
         "downloaded": downloaded,
         "skipped": skipped,
         "failed": failed,

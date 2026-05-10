@@ -192,5 +192,12 @@ document.getElementById("download-offline").addEventListener("click", async () =
     return;
   }
 
+  if (payload.failed > 0) {
+    setStatus(
+      `Offline cache partially complete. Downloaded ${payload.downloaded}, skipped ${payload.skipped}, failed ${payload.failed}.`
+    );
+    return;
+  }
+
   setStatus(`Offline cache complete. Downloaded ${payload.downloaded}, skipped ${payload.skipped}, failed ${payload.failed}.`);
 });
