@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+data/geopdf/*
+!data/geopdf/.gitkeep
+data/tile_cache/*
+!data/tile_cache/.gitkeep

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SeismicNavigator</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="control-panel">
+        <h1>SeismicNavigator</h1>
+
+        <section>
+          <h2>Basemap</h2>
+          <label>
+            Basemap source
+            <select id="basemap-select">
+              <option value="imagery-online">Esri Imagery (Online)</option>
+              <option value="topo-online">Esri Topo (Online)</option>
+              <option value="imagery-offline">Esri Imagery (Offline Cache)</option>
+              <option value="topo-offline">Esri Topo (Offline Cache)</option>
+            </select>
+          </label>
+        </section>
+
+        <section>
+          <h2>Offline Cache (Option A)</h2>
+          <label>
+            Provider
+            <select id="offline-provider">
+              <option value="imagery">Imagery</option>
+              <option value="topo">Topo</option>
+            </select>
+          </label>
+          <div class="grid">
+            <label>Min zoom <input id="min-zoom" type="number" min="0" max="19" value="10" /></label>
+            <label>Max zoom <input id="max-zoom" type="number" min="0" max="19" value="14" /></label>
+          </div>
+          <button id="bbox-from-map">Use current map extent</button>
+          <button id="download-offline">Download tiles</button>
+        </section>
+
+        <section>
+          <h2>Uploads</h2>
+          <label>GeoPDF <input id="geopdf-input" type="file" accept=".pdf" /></label>
+          <button id="upload-geopdf">Upload GeoPDF</button>
+          <label>Shapefile ZIP <input id="shapefile-input" type="file" accept=".zip" /></label>
+        </section>
+
+        <section>
+          <h2>Export</h2>
+          <button id="export-geojson">Export GeoJSON</button>
+          <button id="export-kmz">Export KMZ</button>
+        </section>
+
+        <p id="status" role="status">Ready.</p>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shpjs@6.1.0/dist/shp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tokml@0.4.0/tokml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
