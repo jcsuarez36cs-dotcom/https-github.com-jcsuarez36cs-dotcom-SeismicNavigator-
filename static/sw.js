@@ -65,6 +65,11 @@ self.addEventListener("fetch", (event) => {
             .catch(() => undefined)
         );
         return networkResponse;
+      }).catch(() => {
+        if (request.mode === "navigate") {
+          return caches.match("/") || Response.error();
+        }
+        return Response.error();
       });
     })
   );

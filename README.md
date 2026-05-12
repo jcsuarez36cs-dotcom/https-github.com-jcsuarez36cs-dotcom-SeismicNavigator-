@@ -296,6 +296,11 @@ self.addEventListener("fetch", (event) => {
             .catch(() => undefined)
         );
         return networkResponse;
+      }).catch(() => {
+        if (request.mode === "navigate") {
+          return caches.match("/") || Response.error();
+        }
+        return Response.error();
       });
     })
   );
@@ -309,12 +314,20 @@ Add:
 ```python
 @app.get("/manifest.webmanifest")
 async def manifest() -> FileResponse:
-    return FileResponse(STATIC_DIR / "manifest.webmanifest", media_type="application/manifest+json")
+    return FileResponse(
+        STATIC_DIR / "manifest.webmanifest",
+        media_type="application/manifest+json",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
 
 
 @app.get("/sw.js")
 async def service_worker() -> FileResponse:
-    return FileResponse(STATIC_DIR / "sw.js", media_type="application/javascript")
+    return FileResponse(
+        STATIC_DIR / "sw.js",
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-cache"},
+    )
 ```
 
 ## Install as app on phones
