@@ -280,14 +280,21 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
       return fetch(request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+        if (
+          !networkResponse ||
+          networkResponse.status !== 200 ||
+          (networkResponse.type !== "basic" && networkResponse.type !== "cors")
+        ) {
           return networkResponse;
         }
 
         const responseClone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseClone);
-        });
+        event.waitUntil(
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(request, responseClone))
+            .catch(() => undefined)
+        );
         return networkResponse;
       });
     })
