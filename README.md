@@ -84,3 +84,248 @@ gdal_translate -of PNG input_georef.pdf output.png
 - Uploaded GeoPDF rasters are stored in `data/geopdf/`.
 - Offline tiles are stored in `data/tile_cache/`.
 - Drawn/shapefile features are managed client-side and exported on demand.
+
+## Deploy server online (Render)
+
+1. Push this repository to GitHub.
+2. In Render, create a **Web Service** connected to this repo.
+3. Use:
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `uvicorn app.main:app --host 0.0.0.0 --port 10000`
+4. (Optional) Set `PORT=10000`.
+5. Deploy and open the public URL to verify the app loads.
+
+## PWA support added in this repo
+
+- `static/manifest.webmanifest`
+- `static/sw.js`
+- `static/icons/icon-192.png`
+- `static/icons/icon-512.png`
+- PWA metadata in `static/index.html`
+- Service worker registration in `static/app.js`
+- Root routes for `/manifest.webmanifest` and `/sw.js` in `app/main.py`
+
+## Step-by-step: add the code lines one at a time
+
+### 1) Add PWA lines to `static/index.html` `<head>`
+
+Add line 1:
+
+```html
+<meta name="theme-color" content="#0f172a" />
+```
+
+Add line 2:
+
+```html
+<meta name="apple-mobile-web-app-capable" content="yes" />
+```
+
+Add line 3:
+
+```html
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+```
+
+Add line 4:
+
+```html
+<meta name="apple-mobile-web-app-title" content="SeismicNavigator" />
+```
+
+Add line 5:
+
+```html
+<link rel="manifest" href="/manifest.webmanifest" />
+```
+
+Add line 6:
+
+```html
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
+```
+
+Add line 7:
+
+```html
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png" />
+```
+
+### 2) Add service worker registration to `static/app.js` (bottom of file)
+
+Add line 1:
+
+```javascript
+if ("serviceWorker" in navigator) {
+```
+
+Add line 2:
+
+```javascript
+  window.addEventListener("load", () => {
+```
+
+Add line 3:
+
+```javascript
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+```
+
+Add line 4:
+
+```javascript
+      console.error("Service worker registration failed:", error);
+```
+
+Add line 5:
+
+```javascript
+    });
+```
+
+Add line 6:
+
+```javascript
+  });
+```
+
+Add line 7:
+
+```javascript
+}
+```
+
+### 3) Add manifest file `static/manifest.webmanifest`
+
+Paste this full file:
+
+```json
+{
+  "name": "SeismicNavigator",
+  "short_name": "SeismicNav",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Mobile-friendly web GIS application with GeoPDF, shapefile, and offline tile workflows.",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+### 4) Add service worker file `static/sw.js`
+
+Paste this full file:
+
+```javascript
+const CACHE_NAME = "seismicnavigator-v1";
+const APP_SHELL_ASSETS = [
+  "/",
+  "/manifest.webmanifest",
+  "/static/styles.css",
+  "/static/app.js",
+  "/static/icons/icon-192.png",
+  "/static/icons/icon-512.png",
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL_ASSETS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET") {
+    return;
+  }
+
+  const isStaticAsset =
+    request.url.includes("/static/") ||
+    request.url.endsWith("/manifest.webmanifest") ||
+    request.mode === "navigate";
+
+  if (!isStaticAsset) {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+          return networkResponse;
+        }
+
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseClone);
+        });
+        return networkResponse;
+      });
+    })
+  );
+});
+```
+
+### 5) Add root PWA routes in `app/main.py`
+
+Add:
+
+```python
+@app.get("/manifest.webmanifest")
+async def manifest() -> FileResponse:
+    return FileResponse(STATIC_DIR / "manifest.webmanifest", media_type="application/manifest+json")
+
+
+@app.get("/sw.js")
+async def service_worker() -> FileResponse:
+    return FileResponse(STATIC_DIR / "sw.js", media_type="application/javascript")
+```
+
+## Install as app on phones
+
+### Android (PWA)
+1. Open deployed URL in Chrome.
+2. Tap menu.
+3. Tap **Install app** or **Add to Home Screen**.
+
+### iPhone (PWA)
+1. Open deployed URL in Safari.
+2. Tap **Share**.
+3. Tap **Add to Home Screen**.
+
+## Create a shareable Android APK from the PWA
+
+1. Deploy this app and verify PWA install works.
+2. Open [PWABuilder](https://www.pwabuilder.com/).
+3. Enter your deployed URL.
+4. Build Android package.
+5. Download APK (or Android Studio project) and share it.

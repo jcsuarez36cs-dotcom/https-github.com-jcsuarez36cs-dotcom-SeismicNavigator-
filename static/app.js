@@ -201,3 +201,11 @@ document.getElementById("download-offline").addEventListener("click", async () =
 
   setStatus(`Offline cache complete. Downloaded ${payload.downloaded}, skipped ${payload.skipped}, failed ${payload.failed}.`);
 });
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.error("Service worker registration failed:", error);
+    });
+  });
+}
