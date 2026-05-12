@@ -298,7 +298,7 @@ self.addEventListener("fetch", (event) => {
         return networkResponse;
       }).catch(() => {
         if (request.mode === "navigate") {
-          return caches.match("/") || Response.error();
+          return caches.match("/").then((response) => response || Response.error());
         }
         return Response.error();
       });
