@@ -1,0 +1,119 @@
+SeismicNavigator - How to Open on Android or iPhone
+=====================================================
+
+SeismicNavigator is a web app. There is no app store install.
+Your phone opens it in a mobile browser — Chrome, Safari, Firefox, etc.
+
+There are TWO ways to do this. Pick the one that fits your situation.
+
+=====================================================
+METHOD A: Run the server on your computer and open it on your phone
+             (Recommended — works on Android AND iPhone)
+=====================================================
+
+WHAT YOU NEED:
+  - Your computer and your phone connected to the SAME Wi-Fi network.
+  - The server already running on your computer (see QUICKSTART.txt).
+
+STEP 1: Start the server on your computer.
+  Follow QUICKSTART.txt Steps 1-5.
+  The server must show "Uvicorn running on http://0.0.0.0:8000" before continuing.
+
+STEP 2: Find your computer's local IP address.
+
+  Windows:
+    Open CMD and type:   ipconfig
+    Look for "IPv4 Address" under your Wi-Fi adapter.
+    It will look like:   192.168.x.x
+
+  Mac:
+    Open Terminal and type:   ipconfig getifaddr en0
+    It will look like:        192.168.x.x
+
+  Linux:
+    Open Terminal and type:   hostname -I
+    Use the first address shown.
+
+STEP 3: Make sure your phone is on the same Wi-Fi network as your computer.
+  On your phone: Settings > Wi-Fi — confirm it shows the same network name.
+
+STEP 4: Open the browser on your phone.
+  Type this into the browser address bar (replace x.x with your actual numbers):
+
+      http://192.168.x.x:8000
+
+  Example:   http://192.168.1.45:8000
+
+STEP 5: The SeismicNavigator map should load.
+  Use your phone in portrait or landscape — the layout adjusts automatically.
+
+TROUBLESHOOTING METHOD A:
+  - Phone shows "This site can't be reached" — double-check both devices are on the same Wi-Fi.
+  - Still not connecting — your computer firewall may be blocking port 8000.
+      Windows: search "Windows Defender Firewall" > "Allow an app or feature" > add a rule for port 8000.
+      Mac: System Settings > Privacy & Security > Firewall > allow incoming connections.
+  - Server crashed — restart it on your computer (QUICKSTART.txt Step 5).
+
+
+=====================================================
+METHOD B: Run the server directly on Android using Termux
+             (Advanced — Android only, no computer needed)
+=====================================================
+
+WHAT YOU NEED:
+  - An Android phone.
+  - Termux installed from F-Droid (NOT the Play Store version — it is outdated).
+      F-Droid download: https://f-droid.org/en/packages/com.termux/
+
+STEP 1: Open Termux on your Android phone.
+
+STEP 2: Update Termux packages.
+    pkg update && pkg upgrade
+
+STEP 3: Install Python and git.
+    pkg install python git
+
+STEP 4: Install GDAL (needed for GeoPDF features — skip if you don't need GeoPDF).
+    pkg install gdal
+
+STEP 5: Clone or copy the SeismicNavigator project folder into Termux.
+  If you have the files on your phone already, move them to Termux storage:
+      termux-setup-storage
+  Then copy files in from your Downloads folder as needed.
+
+  OR clone directly from GitHub (if you have internet and the repo is public):
+      git clone https://github.com/jcsuarez36cs-dotcom/SeismicNavigator.git
+      cd SeismicNavigator
+
+STEP 6: Create a virtual environment.
+    python -m venv .venv
+
+STEP 7: Activate the virtual environment.
+    source .venv/bin/activate
+
+STEP 8: Install required packages.
+    pip install -r requirements.txt
+
+STEP 9: Start the server.
+    uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+STEP 10: Open your phone browser (Chrome, Firefox, etc.) and go to:
+    http://127.0.0.1:8000
+
+STEP 11: SeismicNavigator loads. Termux must stay open in the background while using it.
+
+NOTES FOR METHOD B:
+  - Keep Termux running. If you switch away and Android kills it, the server stops.
+  - To stop the server, go back to Termux and press Ctrl+C.
+  - GeoPDF upload requires GDAL with PDF support. If it fails, use Method A from a desktop.
+
+
+=====================================================
+GENERAL TIPS FOR PHONE USE
+=====================================================
+
+- Use Chrome on Android or Safari on iPhone for best map performance.
+- The map controls are designed for touch — pinch to zoom, drag to pan.
+- To export GeoJSON or KMZ, use the Export button — your phone will download the file.
+- Offline tile caching works on both methods — download tiles while on Wi-Fi
+  before going into the field.
