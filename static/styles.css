@@ -75,6 +75,28 @@ button {
   border-radius: 6px;
 }
 
+.nav-info {
+  font-size: 0.85rem;
+  background: #1f2937;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  margin: 0.4rem 0 0;
+  line-height: 1.4;
+}
+
+.search-result-btn {
+  background: #374151;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  text-align: left;
+  margin-bottom: 0.3rem;
+  cursor: pointer;
+}
+
+.search-result-btn:hover {
+  background: #4b5563;
+}
+
 #map {
   flex: 1;
 }

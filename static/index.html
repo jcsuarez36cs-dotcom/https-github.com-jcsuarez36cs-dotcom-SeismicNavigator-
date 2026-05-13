@@ -51,6 +51,29 @@
         </section>
 
         <section>
+          <h2>Navigate to Point</h2>
+          <label>
+            Destination
+            <select id="nav-destination">
+              <option value="">-- Load a point layer first --</option>
+            </select>
+          </label>
+          <button id="start-navigation">▶ Start Navigation</button>
+          <button id="stop-navigation">■ Stop Navigation</button>
+          <p id="nav-info" class="nav-info">No navigation active.</p>
+        </section>
+
+        <section>
+          <h2>Search Points</h2>
+          <label>
+            Search by name
+            <input id="point-search" type="text" placeholder="Type point name…" />
+          </label>
+          <button id="search-point">🔍 Search</button>
+          <div id="search-results"></div>
+        </section>
+
+        <section>
           <h2>Export</h2>
           <button id="export-geojson">Export GeoJSON</button>
           <button id="export-kmz">Export KMZ</button>
