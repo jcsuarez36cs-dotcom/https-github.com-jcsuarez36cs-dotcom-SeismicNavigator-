@@ -19,6 +19,21 @@ Mobile-friendly web GIS application for Android local testing.
 - `static/index.html` - mobile UI and map layout
 - `static/app.js` - map logic (uploads, draw/edit, export, offline cache requests)
 - `static/styles.css` - responsive styles
+- `arcgis_toolbox/SeismicNavigator.pyt` - ArcGIS Pro Python toolbox (master toolbox)
+- `arcgis_toolbox/tools/` - individual tool modules imported by the master toolbox
+
+## ArcGIS Pro toolbox
+
+A consolidated Python toolbox for ArcGIS Pro is provided in `arcgis_toolbox/`.
+It exposes the following tools directly from the Geoprocessing pane:
+
+| Tool | Description |
+|------|-------------|
+| **GeoPDF to Raster** | Convert a georeferenced GeoPDF to PNG and extract WGS-84 bounds (requires GDAL on PATH). |
+| **Offline Tile Downloader** | Download Esri imagery/topo basemap tiles for a selected extent and zoom range for offline use. |
+
+See [`arcgis_toolbox/README.md`](arcgis_toolbox/README.md) for setup instructions
+and guidance on adding more tools.
 
 ## Local run (Linux/macOS/Android Termux)
 
